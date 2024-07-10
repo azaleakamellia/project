@@ -129,12 +129,6 @@ async function render_layers() {
     }
   }).addTo(map);
 
-  L.easyPrint({
-    title: 'Print map',
-    position: 'left',
-    elementsToHide: 'p, h2'
-  }).addTo(map);
-
   // Add Scale Control
   L.control.scale().addTo(map);
 }

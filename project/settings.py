@@ -102,7 +102,7 @@ DATABASES = {
 django_heroku.settings(locals())
 
 GEOS_LIBRARY_PATH = 'C:/OSGeo4W/bin/geos_c.dll'
-GDAL_LIBRARY_PATH = 'C:/OSGeo4W/bin/gdal309.dll'
+GDAL_LIBRARY_PATH = 'C:/OSGeo4W/apps/gdal/share/gdal'
 
 
 # Password validation

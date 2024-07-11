@@ -15,18 +15,6 @@ from pathlib import Path
 import django_heroku
 import dj_database_url
 
-import os
-if os.name == 'nt':
-    import platform
-    OSGEO4W = r"C:\OSGeo4W"
-    if '64' in platform.architecture()[0]:
-        OSGEO4W += "64"
-    assert os.path.isdir(OSGEO4W), "Directory does not exist: " + OSGEO4W
-    os.environ['OSGEO4W_ROOT'] = OSGEO4W
-    os.environ['GDAL_DATA'] = OSGEO4W + r"\share\gdal"
-    os.environ['PROJ_LIB'] = OSGEO4W + r"\share\proj"
-    os.environ['PATH'] = OSGEO4W + r"\bin;" + os.environ['PATH']
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -102,7 +90,8 @@ DATABASES = {
 django_heroku.settings(locals())
 
 GEOS_LIBRARY_PATH = 'C:/OSGeo4W/bin/geos_c.dll'
-GDAL_LIBRARY_PATH = 'C:/OSGeo4W/apps/gdal/share/gdal'
+GDAL_LIBRARY_PATH = 'C:/OSGeo4W/bin/gdal309.dll'
+
 
 
 # Password validation

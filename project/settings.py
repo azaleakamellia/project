@@ -84,12 +84,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgres://project_admin:invu@localhost:5432/projectdb',
-        conn_max_age=600,
-        ssl_require=True 
-        
-    )
+    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
 }   
 
 # Activate_heroku.settings(locals())

@@ -1,4 +1,4 @@
-asgiref==3.8.1
+asgiref @ file:///home/conda/feedstock_root/build_artifacts/asgiref_1711268871457/work
 blinker==1.8.2
 branca==0.7.2
 certifi==2024.6.2
@@ -13,8 +13,8 @@ django-filter==24.2
 django-geojson==4.1.0
 django-heroku==0.3.1
 django-leaflet==0.30.1
-djangorestframework==3.15.2
-djangorestframework-gis==1.0
+djangorestframework @ file:///home/conda/feedstock_root/build_artifacts/djangorestframework_1718812538421/work
+djangorestframework-gis @ file:///home/conda/feedstock_root/build_artifacts/djangorestframework-gis_1652197188042/work
 et-xmlfile==1.1.0
 Flask==3.0.3
 folium==0.17.0
@@ -35,7 +35,6 @@ openpyxl==3.1.5
 packaging==24.1
 pandas==2.2.2
 pillow==10.4.0
-pip==24.0
 platformdirs==4.2.2
 polars==1.0.0
 pooch==1.8.2
@@ -52,8 +51,8 @@ setuptools==70.1.1
 shapely==2.0.4
 six==1.16.0
 SQLAlchemy==2.0.31
-sqlparse==0.5.0
-typing_extensions==4.12.2
+sqlparse @ file:///home/conda/feedstock_root/build_artifacts/sqlparse_1715013953229/work
+typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1717802530399/work
 tzdata==2024.1
 urllib3==2.2.2
 Werkzeug==3.0.3

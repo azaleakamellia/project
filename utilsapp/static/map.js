@@ -1,4 +1,4 @@
-const map = L.map("map");
+const map = L.map("map"); // Initial map setup without center and zoom to fit bounds later
 
 // Basemaps
 const baseLayers = {
@@ -9,13 +9,10 @@ const baseLayers = {
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }
   ),
-  CycleOSM: L.tileLayer(
-    "https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=YOUR_API_KEY",
-    {
-      attribution:
-        '&copy; <a href="https://www.thunderforest.com/maps/cycle/">Thunderforest</a> contributors',
-    }
-  ),
+  OpenTopoMap: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+    attribution:
+      'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+  }),
   "CartoDB Positron": L.tileLayer(
     "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
     {
@@ -41,72 +38,65 @@ function getStyle(model) {
   const styles = {
     ns: function (feature) {
       const client = feature.properties.client_gov;
+      const colors = {
+        Maxis: "#C80036",
+        Telekom: "#2B3467",
+        Times: "#FF4191",
+      };
       return {
-        color:
-          client === "Maxis"
-            ? "red"
-            : client === "Telekom"
-            ? "blue"
-            : "#E90074",
-        weight: client === "Maxis" ? 3 : 2,
+        color: colors[client],
+        weight: 0.75,
         opacity: 0.9,
-        dashArray: client === "Maxis" ? "10, 5" : "5, 5",
       };
     },
-    wp: { color: "green", weight: 2, opacity: 0.9, dashArray: "5, 5" },
-    pl: { color: "#F4CE14", weight: 2, opacity: 0.9, dashArray: "5, 5" },
-    rd: { color: "lightgray", weight: 1, opacity: 0.9 },
-    row: { color: "#FFA500", weight: 2, opacity: 0.9, dashArray: "5, 5" },
+    wp: {
+      color: "#1679AB",
+      weight: 2,
+      opacity: 0.9,
+      dashArray: "5 2.5",
+    },
+    pl: {
+      color: "#0A6847",
+      weight: 1,
+      opacity: 0.9,
+      // Custom powerline style
+    },
+    rd: {
+      color: "#686D76",
+      weight: 2,
+      opacity: 0.9,
+    },
+    row: {
+      color: "#000000",
+      weight: 1.5,
+      opacity: 2.5,
+      dashArray: "1 5",
+    },
+    mh: function (feature) {
+      return {
+        color:
+          feature.properties.layer !== "prop TTDC MH" ? "red" : "transparent",
+        weight: 2,
+        opacity: 0.9,
+      };
+    },
   };
   return styles[model] || {};
-}
-
-// Style function for manhole data
-function manholeStyle(feature) {
-  if (feature.properties.MANHOLE === "value") {
-    return {
-      color: "black",
-      weight: 2,
-      opacity: 1,
-      fillOpacity: 0,
-    };
-  } else {
-    return {
-      color: "red",
-      weight: 2,
-      opacity: 1,
-      fillOpacity: 0.8,
-    };
-  }
 }
 
 // Popup for layers
 function onEachFeature(feature, layer, layerName) {
   const popupContent = `
     <b>${layerName}</b>
-    <br>Client: ${feature.properties.client_gov}
-    <br>Elevation: ${feature.properties.elevation}m
-    <br>Doc Update: ${feature.properties.docupdate}
+    <br>Client: ${feature.properties.client_gov || "N/A"}
+    <br>Elevation: ${feature.properties.elevation || "N/A"}m
+    <br>Doc Update: ${feature.properties.docupdate || "N/A"}
   `;
   layer.bindPopup(popupContent);
 
   // Zoom to feature on click
   layer.on("click", function () {
-    map.fitBounds(layer.getBounds());
-  });
-}
-
-// Popup for manhole layer
-function onEachManholeFeature(feature, layer) {
-  const popupContent = `
-    <b>Manhole</b>
-    <br>Type: ${feature.properties.MANHOLE}
-  `;
-  layer.bindPopup(popupContent);
-
-  // Zoom to feature on click
-  layer.on("click", function () {
-    map.fitBounds(layer.getBounds());
+    map.fitBounds(layer.getBounds(), { maxZoom: 18 }); // Increase maxZoom to 18
   });
 }
 
@@ -126,22 +116,26 @@ async function render_layers() {
     pl: "Powerline",
     rd: "Road",
     row: "Right of Way",
-    mh: "Manholes",
+    mh: "Manhole",
   };
 
   let layers = [];
+  let specificLayers = [];
 
   for (const model of models) {
     const data = await load_data(model);
     const layerName = layerNames[model];
     const layer = L.geoJSON(data, {
-      style: model === "mh" ? manholeStyle : getStyle(model),
-      onEachFeature:
-        model === "mh"
-          ? onEachManholeFeature
-          : (feature, layer) => onEachFeature(feature, layer, layerName),
+      style: getStyle(model),
+      onEachFeature: (feature, layer) =>
+        onEachFeature(feature, layer, layerName),
     }).addTo(map);
     layers.push(layer);
+
+    // Add specific layers (excluding `pl` as an example)
+    if (model !== "pl") {
+      specificLayers.push(layer);
+    }
   }
 
   // Fit map to bounds
@@ -155,12 +149,12 @@ async function render_layers() {
     Powerline: layers[2],
     Road: layers[3],
     "Right of Way": layers[4],
-    Manholes: layers[5],
+    Manhole: layers[5],
   };
 
   L.control.layers(baseLayers, overlays, { collapsed: true }).addTo(map);
 
-  // Add Home Button Control to reset viewport to data layers
+  // Add Home Button Control to reset viewport to specific layers
   const homeButton = L.Control.extend({
     options: { position: "topleft" },
     onAdd: function () {
@@ -168,16 +162,10 @@ async function render_layers() {
         "div",
         "leaflet-bar leaflet-control leaflet-control-custom"
       );
-      container.style.backgroundColor = "white";
-      container.style.width = "30px";
-      container.style.height = "30px";
       container.innerHTML = '<i class="fas fa-home fa-lg"></i>';
-      container.style.display = "flex";
-      container.style.justifyContent = "center";
-      container.style.alignItems = "center";
-      container.style.cursor = "pointer";
       container.onclick = function () {
-        map.fitBounds(group.getBounds());
+        const specificGroup = new L.featureGroup(specificLayers);
+        map.fitBounds(specificGroup.getBounds());
       };
       return container;
     },
@@ -201,11 +189,11 @@ async function render_layers() {
   // Add Print Control
   L.easyPrint({
     title: "Print map",
-    position: "topleft",
-    elementsToHide: "legend",
+    position: "left",
+    exportOnly: true,
     sizeModes: ["A4Portrait", "A4Landscape"],
-  }).addTo(map);
+  }).addPrintButton("leaflet-control-easyPrint");
 }
 
-// Initialize the map and render layers
+// Initialize the map with layers
 render_layers();

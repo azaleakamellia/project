@@ -43,7 +43,7 @@ class rowSerializer(serializers.GeoFeatureModelSerializer):
 
 class mhSerializer(serializers.GeoFeatureModelSerializer):
     class Meta:
-        fields =  ('id', 'client_gov', 'layer', 'elevation', 
+        fields =  ('id', 'layer', 'elevation', 
                     'docupdate')
         geo_field = 'geom'
         model = mh
